@@ -7,7 +7,7 @@ SPECIAL_CHARS = [chr(x) for x in (range(1, 9) + range(11, 13) + range(14, 32) + 
 
 
 def most_common_words(text, num_words):
-    words = (word for word in text.split())
+    words = (word for word in text.split() if len(word) > 1)
     common_words = Counter(words).most_common(num_words)
     return [x[0] for x in common_words]
 
