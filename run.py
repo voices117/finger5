@@ -1,4 +1,5 @@
 import os
+import shutil
 import encoder
 import subprocess
 
@@ -25,23 +26,27 @@ def print_table_entry(file, original, gz, encoded, enc_gz):
 
 
 if __name__ == '__main__':
+    if not os.path.exists('target'):
+        os.mkdir('target')
+
     print_table_header()
     print_separator()
 
-    for file in os.listdir('.'):
+    for file in os.listdir('data'):
         try:
             if file.endswith('.txt'):
-                os.system('gzip -fk9 %s' % file)
-                encoder.encode(file)
-                os.system('gzip -fk9 %s.encoded' % file)
+                os.system('gzip -fk9 data/%s' % file)
+                shutil.move('data/%s.gz' % file, 'target/%s.gz' % file)
+                encoder.encode('data/'+file, 'target/'+file+'.encoded')
+                os.system('gzip -fk9 target/%s.encoded' % file)
 
-                print_table_entry(file, fsize(file), fsize(file + '.gz'), fsize(file + '.encoded'), fsize(file + '.encoded.gz'))
+                print_table_entry(file, fsize('data/'+file), fsize('target/'+file + '.gz'), fsize('target/'+file + '.encoded'), fsize('target/'+file + '.encoded.gz'))
 
-                encoder.decode(file + '.encoded')
-                assert fsize(file + '.encoded.decoded') == fsize(file), file
+                encoder.decode('target/'+file + '.encoded')
+                assert fsize('target/'+file + '.encoded.decoded') == fsize('data/'+file), file
 
-                with open(file + '.encoded.decoded', 'r') as fp:
-                    with open(file, 'r') as fp2:
+                with open('target/'+file + '.encoded.decoded', 'r') as fp:
+                    with open('data/'+file, 'r') as fp2:
                         assert fp.read() == fp2.read()
         except:
             print 'error in', file
